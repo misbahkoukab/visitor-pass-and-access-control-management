@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="fw-bold">
+                <img src="https://img.icons8.com/color/48/admin-settings-male.png" alt="Admin" class="me-2">
+                Administrator Dashboard
+            </h2>
+            <p class="text-muted">Complete system overview and management</p>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-icon">
+                    <img src="https://img.icons8.com/color/64/conference-call.png" alt="Visitors">
+                </div>
+                <div class="stat-details">
+                    <div class="stat-value">{{ stats.total_visitors }}</div>
+                    <div class="stat-label">Total Visitors</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-success">
+                <div class="stat-icon">
+                    <img src="https://img.icons8.com/color/64/checked-user-male.png" alt="Active">
+                </div>
+                <div class="stat-details">
+                    <div class="stat-value">{{ stats.active_visitors }}</div>
+                    <div class="stat-label">Active Now</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-info">
+                <div class="stat-icon">
+                    <img src="https://img.icons8.com/color/64/user-group-man-woman.png" alt="Users">
+                </div>
+                <div class="stat-details">
+                    <div class="stat-value">{{ stats.total_users }}</div>
+                    <div class="stat-label">Receptionists</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-warning">
+                <div class="stat-icon">
+                    <img src="https://img.icons8.com/color/64/office.png" alt="Zones">
+                </div>
+                <div class="stat-details">
+                    <div class="stat-value">{{ stats.total_zones }}</div>
+                    <div class="stat-label">Total Zones</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Visitor Distribution Chart -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-pie-chart-fill me-2 text-primary"></i>
+                        Visitors by Purpose
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="purposeChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-lightning-charge-fill me-2 text-primary"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('manage_zones') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-building me-2"></i> Manage Zones
+                        </a>
+                        <a href="{{ url_for('manage_users') }}" class="btn btn-outline-success">
+                            <i class="bi bi-people me-2"></i> Manage Users
+                        </a>
+                        <a href="{{ url_for('analytics') }}" class="btn btn-outline-info">
+                            <i class="bi bi-graph-up me-2"></i> View Analytics
+                        </a>
+                        <a href="{{ url_for('zone_access') }}" class="btn btn-outline-warning">
+                            <i class="bi bi-door-open me-2"></i> Zone Access
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Access Logs (moved below Quick Actions) -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-activity me-2 text-primary"></i>
+                        Recent Access Logs
+                    </h5>
+                </div>
+                <div class="card-body access-log-container">
+                    {% for log in recent_logs[:10] %}
+                    <div class="access-log-item">
+                        <div class="log-icon {% if log.status == 'granted' %}log-success{% else %}log-danger{% endif %}">
+                            <i class="bi {% if log.status == 'granted' %}bi-check-circle-fill{% else %}bi-x-circle-fill{% endif %}"></i>
+                        </div>
+                        <div class="log-details">
+                            <div class="log-name">{{ log.visitor_name }}</div>
+                            <div class="log-info">
+                                <span class="badge bg-secondary">{{ log.zone }}</span>
+                                <small class="text-muted ms-2">{{ log.timestamp|datetime }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Visitors (full width, rounded) -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-clock-history me-2 text-primary"></i>
+                        Recent Visitors
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive rounded-bottom">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Visitor</th>
+                                    <th>Purpose</th>
+                                    <th>Location</th>
+                                    <th>Time</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for visitor in recent_visitors[:5] %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-2">
+                                                {{ visitor.full_name[0].upper() }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">{{ visitor.title }} {{ visitor.full_name }}</div>
+                                                <small class="text-muted">{{ visitor.visitor_id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-purpose-{{ visitor.purpose|lower|replace(' ', '-') }}">
+                                            {{ visitor.purpose }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if visitor.current_location %}
+                                            <span class="badge bg-info">{{ visitor.current_location }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ visitor.created_at|datetime }}</td>
+                                    <td>
+                                        <a href="{{ url_for('edit_visitor_zones', visitor_id=visitor.visitor_id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Visitor Purpose Distribution Chart
+    const purposeData = {{ purpose_counts | tojson }};
+    const ctx = document.getElementById('purposeChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(purposeData),
+            datasets: [{
+                data: Object.values(purposeData),
+                backgroundColor: [
+                    '#4e73df',
+                    '#1cc88a',
+                    '#36b9cc',
+                    '#f6c23e',
+                    '#e74a3b',
+                    '#858796',
+                    '#5a5c69',
+                    '#2e59d9'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

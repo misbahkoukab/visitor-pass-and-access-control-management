@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6">
+                <div class="hero-content" data-aos="fade-right">
+                    <h1 class="display-3 fw-bold mb-4">
+                        Welcome to <span style="color: rgb(151, 79, 218);">TechCorp</span> Visitor Management
+                    </h1>
+                    <p class="lead text-muted mb-4">
+                        Advanced QR-based visitor tracking system ensuring security, 
+                        efficiency, and seamless IT campus facility management.
+                    </p>
+                    <div class="d-flex gap-3">
+                        {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Get Started
+                        </a>
+                        <a href="#features" class="btn btn-outline-primary btn-lg">
+                            Learn More <i class="bi bi-arrow-down ms-2"></i>
+                        </a>
+                        {% else %}
+                        {% if current_user.role == 'user' %}
+                        <a href="{{ url_for('user_dashboard') }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-person-circle me-2"></i> My Account
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('zone_access') }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-door-open me-2"></i> Access Zones
+                        </a>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image" data-aos="fade-left">
+                    <img src="https://img.icons8.com/3d-fluency/400/office.png" alt="TechCorp Office" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="display-5 fw-bold">Key Features</h2>
+            <p class="lead text-muted">Comprehensive visitor management for modern IT campuses and tech companies</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <img src="https://img.icons8.com/color/96/qr-code.png" alt="QR Code">
+                    </div>
+                    <h5 class="fw-bold">QR-Based Access</h5>
+                    <p class="text-muted">Secure, contactless entry with unique QR codes for each visitor</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <img src="https://img.icons8.com/color/96/map-pin.png" alt="Real-time Tracking">
+                    </div>
+                    <h5 class="fw-bold">Real-Time Tracking</h5>
+                    <p class="text-muted">Monitor visitor location and movement across facility zones</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <img src="https://img.icons8.com/color/96/security-checked.png" alt="Security">
+                    </div>
+                    <h5 class="fw-bold">Zone Authorization</h5>
+                    <p class="text-muted">Granular access control based on visitor type and purpose</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <img src="https://img.icons8.com/color/96/bar-chart.png" alt="Analytics">
+                    </div>
+                    <h5 class="fw-bold">Analytics Dashboard</h5>
+                    <p class="text-muted">Comprehensive insights and visitor traffic analysis</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="display-5 fw-bold">How It Works</h2>
+            <p class="lead text-muted">Simple, efficient visitor management in 4 easy steps</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <img src="https://img.icons8.com/fluency/96/registration.png" alt="Register" class="mb-3">
+                    <h5 class="fw-bold">Register</h5>
+                    <p class="text-muted">Visitor details captured at reception desk</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <img src="https://img.icons8.com/fluency/96/qr-code.png" alt="Generate" class="mb-3">
+                    <h5 class="fw-bold">Generate Pass</h5>
+                    <p class="text-muted">Unique QR code pass generated instantly</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <img src="https://img.icons8.com/fluency/96/barcode-scanner.png" alt="Scan" class="mb-3">
+                    <h5 class="fw-bold">Scan & Access</h5>
+                    <p class="text-muted">Scan QR at zone entry points for access</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="process-step">
+                    <div class="step-number">4</div>
+                    <img src="https://img.icons8.com/fluency/96/activity-history.png" alt="Track" class="mb-3">
+                    <h5 class="fw-bold">Track</h5>
+                    <p class="text-muted">Real-time monitoring and access logs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right">
+                <h2 class="display-5 fw-bold mb-4">Why Choose Our System?</h2>
+                <ul class="list-unstyled">
+                    <li class="mb-3">
+                        <i class="bi bi-check-circle-fill me-3"></i>
+                        <strong>Enhanced Security:</strong> Multi-layer access control and real-time monitoring
+                    </li>
+                    <li class="mb-3">
+                        <i class="bi bi-check-circle-fill me-3"></i>
+                        <strong>Contactless Solution:</strong> QR-based system minimizes physical contact
+                    </li>
+                    <li class="mb-3">
+                        <i class="bi bi-check-circle-fill me-3"></i>
+                        <strong>Easy Integration:</strong> Seamlessly works with existing infrastructure
+                    </li>
+                    <li class="mb-3">
+                        <i class="bi bi-check-circle-fill me-3"></i>
+                        <strong>Comprehensive Reports:</strong> Detailed analytics and visitor insights
+                    </li>
+                    <li class="mb-3">
+                        <i class="bi bi-check-circle-fill me-3"></i>
+                        <strong>Automated Workflows:</strong> Reduces manual processing and errors
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left">
+                <img src="https://img.icons8.com/3d-fluency/400/security-shield-green.png" alt="Enterprise Security" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="container text-center" data-aos="zoom-in">
+        <h2 class="display-5 fw-bold mb-4">Ready to Streamline Your Visitor Management?</h2>
+        <p class="lead text-muted mb-4">Join leading IT companies using our advanced VMS</p>
+        {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+            <i class="bi bi-person-plus me-2"></i> Get Started Now
+        </a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- AOS Animation Library -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init({
+        duration: 800,
+        once: true
+    });
+</script>
+{% endblock %}

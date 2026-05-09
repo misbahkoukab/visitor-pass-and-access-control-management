@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="fw-bold">
+                <img src="https://img.icons8.com/color/48/office.png" alt="Zones" class="me-2">
+                Zone Management
+            </h2>
+            <p class="text-muted">Manage facility zones and access permissions</p>
+        </div>
+    </div>
+
+    <!-- Zone Grid -->
+    <div class="row g-4">
+        {% for zone in zones %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="zone-card">
+                <div class="zone-icon">
+                    <img src="https://img.icons8.com/fluency/96/room.png" alt="Zone">
+                </div>
+                <h5 class="zone-name">{{ zone }}</h5>
+                <div class="zone-stats">
+                    <div class="stat-item">
+                        <i class="bi bi-people text-primary"></i>
+                        <span>Active: {{ zone_counts.get(zone, 0) if zone_counts is defined else 0 }}</span>
+                    </div>
+                </div>
+                <div class="zone-actions">
+                    <a href="{{ url_for('edit_zone', zone_name=zone) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <a href="{{ url_for('view_zone', zone_name=zone) }}" class="btn btn-sm btn-outline-info">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                    <form method="POST" action="{{ url_for('delete_zone', zone_name=zone) }}" style="display:inline-block;">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete zone {{ zone }}?');">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Add Zone Button -->
+    <div class="text-center mt-4">
+        <button class="btn btn-primary btn-lg" data-bs-toggle="collapse" data-bs-target="#addZoneForm">
+            <i class="bi bi-plus-circle me-2"></i> Add New Zone
+        </button>
+        <p class="text-muted mt-2">
+            <small>Zone management features can be customized as needed</small>
+        </p>
+    </div>
+
+    <div class="collapse mt-4" id="addZoneForm">
+        <div class="card card-body">
+            <form method="POST" action="{{ url_for('add_zone') }}">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-9">
+                        <input type="text" name="zone_name" class="form-control" placeholder="New zone name" required>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success w-100" type="submit">Add Zone</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

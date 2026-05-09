@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 text-center">
+            <img src="https://img.icons8.com/color/200/error.png" alt="500" class="mb-4">
+            <h1 class="display-1 fw-bold text-danger">500</h1>
+            <h3 class="mb-4">Internal Server Error</h3>
+            <p class="text-muted mb-4">Something went wrong on our end. Please try again later.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-house-door me-2"></i> Go Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

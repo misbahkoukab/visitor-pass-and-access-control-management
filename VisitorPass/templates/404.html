@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 text-center">
+            <img src="https://img.icons8.com/color/200/error.png" alt="404" class="mb-4">
+            <h1 class="display-1 fw-bold text-primary">404</h1>
+            <h3 class="mb-4">Page Not Found</h3>
+            <p class="text-muted mb-4">The page you are looking for doesn't exist or has been moved.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-house-door me-2"></i> Go Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

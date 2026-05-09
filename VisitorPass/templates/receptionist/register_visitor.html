@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0">
+                        <img src="https://img.icons8.com/color/48/add-user-male.png" alt="Register" class="me-2">
+                        Register New Visitor
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('register_visitor') }}" id="visitorForm">
+                        <!-- Personal Information -->
+                        <div class="form-section mb-4">
+                            <h5 class="section-title">
+                                <i class="bi bi-person-circle me-2"></i>
+                                Personal Information
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label for="title" class="form-label required">Title</label>
+                                    <select class="form-select" id="title" name="title" required>
+                                        <option value="">Select</option>
+                                        <option value="Mr">Mr</option>
+                                        <option value="Ms">Ms</option>
+                                        <option value="Mrs">Mrs</option>
+                                        <option value="Dr">Dr</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-9">
+                                    <label for="full_name" class="form-label required">Full Name</label>
+                                    <input type="text" class="form-control" id="full_name" name="full_name" required>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="contact_number" class="form-label required">Contact Number</label>
+                                    <input type="tel" class="form-control" id="contact_number" name="contact_number" 
+                                           pattern="[0-9]{10}" placeholder="10-digit number" required>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label required">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="password" class="form-label">Set Password (optional)</label>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Optional: allow visitor to login">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="confirm_password" class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm password">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Visit Details -->
+                        <div class="form-section mb-4">
+                            <h5 class="section-title">
+                                <i class="bi bi-calendar-event me-2"></i>
+                                Visit Details
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label for="purpose" class="form-label required">Purpose of Visit</label>
+                                    <select class="form-select" id="purpose" name="purpose" required>
+                                        <option value="">Select Purpose</option>
+                                        {% for purpose in purposes %}
+                                        <option value="{{ purpose }}">{{ purpose }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="start_datetime" class="form-label required">Start Date & Time</label>
+                                    <input type="datetime-local" class="form-control" id="start_datetime" 
+                                           name="start_datetime" required>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="end_datetime" class="form-label required">End Date & Time</label>
+                                    <input type="datetime-local" class="form-control" id="end_datetime" 
+                                           name="end_datetime" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Zone Authorization -->
+                        <div class="form-section mb-4">
+                            <h5 class="section-title">
+                                <i class="bi bi-building me-2"></i>
+                                Authorized Zones
+                            </h5>
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Zones are auto-assigned based on visit purpose. You can customize if needed.
+                            </div>
+                            
+                            <div id="zonesContainer" class="row g-2">
+                                {% for zone in all_zones %}
+                                <div class="col-md-4">
+                                    <div class="form-check zone-checkbox">
+                                        <input class="form-check-input" type="checkbox" name="authorized_zones" 
+                                               value="{{ zone }}" id="zone_{{ loop.index }}">
+                                        <label class="form-check-label" for="zone_{{ loop.index }}">
+                                            {{ zone }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-3 justify-content-end">
+                            <a href="{{ url_for('receptionist_dashboard') }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle me-2"></i> Register Visitor
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Set minimum datetime to now
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('start_datetime').min = now.toISOString().slice(0, 16);
+    document.getElementById('end_datetime').min = now.toISOString().slice(0, 16);
+    
+    // Set default start time to now
+    document.getElementById('start_datetime').value = now.toISOString().slice(0, 16);
+    
+    // Set default end time to 8 hours from now
+    const endTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    document.getElementById('end_datetime').value = endTime.toISOString().slice(0, 16);
+
+    // Zone mappings based on purpose
+    const zoneMappings = {{ config.ZONE_MAPPINGS | tojson }};
+    
+    document.getElementById('purpose').addEventListener('change', function() {
+        const purpose = this.value;
+        const checkboxes = document.querySelectorAll('input[name="authorized_zones"]');
+        
+        // Uncheck all first
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        // Check zones based on purpose
+        if (zoneMappings[purpose]) {
+            checkboxes.forEach(cb => {
+                if (zoneMappings[purpose].includes(cb.value)) {
+                    cb.checked = true;
+                }
+            });
+        }
+    });
+    
+    // Validate end time is after start time
+    document.getElementById('visitorForm').addEventListener('submit', function(e) {
+        const startTime = new Date(document.getElementById('start_datetime').value);
+        const endTime = new Date(document.getElementById('end_datetime').value);
+        
+        if (endTime <= startTime) {
+            e.preventDefault();
+            alert('End time must be after start time');
+        }
+    });
+</script>
+{% endblock %}

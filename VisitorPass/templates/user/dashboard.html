@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h3 class="fw-bold mb-3">My Account</h3>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3 avatar-lg bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">{{ user.name[0].upper() }}</div>
+                        <div>
+                            <h5 class="mb-0">{{ user.name }}</h5>
+                            <small class="text-muted">{{ user.email }}</small>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+                    <p><strong>Role:</strong> {{ user.role }}</p>
+                    {% if user.authorized_zones %}
+                    <p><strong>Authorized Zones:</strong>
+                        {% for z in user.authorized_zones %}
+                        <span class="badge bg-info text-dark me-1">{{ z }}</span>
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if visitor %}
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">My Visitor Pass</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Visitor ID:</strong> <span class="badge bg-secondary">{{ visitor.visitor_id }}</span></p>
+                            <p><strong>Validity:</strong> {{ visitor.start_datetime|datetime }} — {{ visitor.end_datetime|datetime }}</p>
+                            <p>
+                                <strong>Authorized Zones:</strong>
+                                {% for z in visitor.authorized_zones %}
+                                <span class="badge bg-info text-dark me-1">{{ z }}</span>
+                                {% endfor %}
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <img src="data:image/png;base64,{{ visitor.qr_code_image }}" alt="QR Code" class="img-fluid" style="max-width:220px">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="card-header">Recent Access Logs</div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for log in recent_logs %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ log.visitor_name }}</strong>
+                                    <div class="small text-muted">{{ log.zone }} — {{ log.access_type }} — {{ log.reason or '' }}</div>
+                                </div>
+                                <div class="text-end small text-muted">{{ log.timestamp|datetime }}</div>
+                            </div>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item text-muted">No recent access logs found.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

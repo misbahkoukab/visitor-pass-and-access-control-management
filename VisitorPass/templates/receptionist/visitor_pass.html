@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Success Message -->
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong>Success!</strong> Visitor registered successfully. Pass generated below.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Visitor Pass Card -->
+            <div class="card shadow-lg border-0 mb-4" id="visitorPassCard">
+                <div class="card-header bg-gradient-primary text-white text-center py-4">
+                    <h3 class="mb-0 fw-bold">VISITOR ACCESS PASS</h3>
+                    <p class="mb-0 opacity-75">TechCorp IT Campus Management System</p>
+                </div>
+                <div class="card-body p-5">
+                    <div class="row">
+                        <!-- Visitor Information -->
+                        <div class="col-md-6 border-end">
+                            <h5 class="fw-bold mb-4 text-primary">
+                                <i class="bi bi-person-badge me-2"></i>
+                                Visitor Information
+                            </h5>
+                            
+                            <div class="visitor-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Name:</span>
+                                    <span class="detail-value">{{ visitor.title }} {{ visitor.full_name }}</span>
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">Visitor ID:</span>
+                                    <span class="detail-value">
+                                        <span class="badge bg-secondary fs-6">{{ visitor.visitor_id }}</span>
+                                    </span>
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">Contact:</span>
+                                    <span class="detail-value">{{ visitor.contact_number }}</span>
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">Email:</span>
+                                    <span class="detail-value">{{ visitor.email }}</span>
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">Purpose:</span>
+                                    <span class="detail-value">
+                                        <span class="badge badge-purpose-{{ visitor.purpose|lower|replace(' ', '-') }}">
+                                            {{ visitor.purpose }}
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <hr class="my-4">
+                            
+                            <h6 class="fw-bold mb-3 text-primary">
+                                <i class="bi bi-calendar-range me-2"></i>
+                                Validity Period
+                            </h6>
+                            
+                            <div class="validity-info">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-calendar-check text-success me-2"></i>
+                                    <span class="fw-semibold">From:</span>
+                                    <span class="ms-2">{{ visitor.start_datetime|datetime }}</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-x text-danger me-2"></i>
+                                    <span class="fw-semibold">Until:</span>
+                                    <span class="ms-2">{{ visitor.end_datetime|datetime }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- QR Code Section -->
+                        <div class="col-md-6 text-center">
+                            <h5 class="fw-bold mb-4 text-primary">
+                                <i class="bi bi-qr-code me-2"></i>
+                                Access QR Code
+                            </h5>
+                            
+                            <div class="qr-code-container mb-4">
+                                <img src="data:image/png;base64,{{ visitor.qr_code_image }}" 
+                                     alt="QR Code" class="qr-code-image">
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <small><strong>Important:</strong> Scan this QR code at each zone entry point</small>
+                            </div>
+                            
+                            <h6 class="fw-bold mb-3 text-primary">
+                                <i class="bi bi-building-check me-2"></i>
+                                Authorized Zones
+                            </h6>
+                            
+                            <div class="authorized-zones">
+                                {% for zone in visitor.authorized_zones %}
+                                <span class="badge bg-info me-2 mb-2">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    {{ zone }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light text-center py-3">
+                    <small class="text-muted">
+                        <i class="bi bi-shield-check me-1"></i>
+                        This pass is valid only for the specified duration and authorized zones
+                    </small>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-3 justify-content-center mb-4">
+                <button onclick="window.print()" class="btn btn-primary btn-lg">
+                    <i class="bi bi-printer me-2"></i> Print Pass
+                </button>
+                <button onclick="downloadPass()" class="btn btn-success btn-lg">
+                    <i class="bi bi-download me-2"></i> Download PDF
+                </button>
+                <a href="{{ url_for('register_visitor') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-person-plus me-2"></i> Register Another
+                </a>
+                <a href="{{ url_for('receptionist_dashboard') }}" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-arrow-left me-2"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #visitorPassCard, #visitorPassCard * {
+            visibility: visible;
+        }
+        #visitorPassCard {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .btn, .alert-success {
+            display: none !important;
+        }
+    }
+</style>
+
+<script>
+    function downloadPass() {
+        // In a real implementation, you would generate a PDF
+        // For now, we'll trigger print
+        window.print();
+    }
+</script>
+{% endblock %}

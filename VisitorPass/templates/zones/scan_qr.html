@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0 fw-bold">
+                        <img src="https://img.icons8.com/color/48/qr-code.png" alt="QR" class="me-2">
+                        {{ zone_name }}
+                    </h3>
+                    <p class="mb-0 opacity-75">Scan visitor QR code for access</p>
+                </div>
+                <div class="card-body p-4">
+                    <!-- QR Scanner -->
+                    <div id="qr-reader" class="mb-4"></div>
+
+                    <!-- Status Messages -->
+                    <div id="scanStatus" class="text-center mb-3" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Processing...</span>
+                        </div>
+                        <p class="mt-2">Processing access request...</p>
+                    </div>
+
+                    <!-- Result Container -->
+                    <div id="accessResult" style="display: none;"></div>
+
+                    <!-- Manual Entry Option -->
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#manualEntry">
+                            <i class="bi bi-keyboard me-2"></i> Manual Entry
+                        </button>
+                    </div>
+
+                    <div class="collapse mt-3" id="manualEntry">
+                        <div class="card card-body">
+                            <form id="manualEntryForm">
+                                <div class="mb-3">
+                                    <label for="visitorId" class="form-label">Visitor ID</label>
+                                    <input type="text" class="form-control" id="visitorId" placeholder="Enter Visitor ID">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-check-circle me-2"></i> Verify Access
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Back Button -->
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('zone_access') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left me-2"></i> Back to Zones
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Use local file instead of CDN -->
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script><script>
+    const zoneName = "{{ zone_name }}";
+    let html5QrcodeScanner;
+
+    function onScanSuccess(decodedText, decodedResult) {
+        // Stop scanner
+        html5QrcodeScanner.clear();
+        processAccess(decodedText);
+    }
+
+    function processAccess(qrData) {
+        // Show processing status
+        document.getElementById('scanStatus').style.display = 'block';
+        document.getElementById('accessResult').style.display = 'none';
+
+        // Send to server for verification
+        fetch('/api/verify-access', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                qr_data: qrData,
+                zone_name: zoneName
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('scanStatus').style.display = 'none';
+            document.getElementById('accessResult').style.display = 'block';
+            
+            if (data.status === 'granted') {
+                document.getElementById('accessResult').innerHTML = `
+                    <div class="alert alert-success text-center">
+                        <img src="https://img.icons8.com/color/96/ok.png" alt="Success" class="mb-3">
+                        <h4 class="alert-heading">Access Granted!</h4>
+                        <hr>
+                        <p class="mb-0"><strong>${data.visitor_name}</strong></p>
+                        <p class="mb-0">Welcome to ${data.zone}</p>
+                        <small class="text-muted">Current Location: ${data.zone}</small>
+                    </div>
+                `;
+                
+                // Play voice message
+                speakMessage(data.voice_message);
+                
+                // Auto-redirect after 3 seconds
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
+            } else {
+                document.getElementById('accessResult').innerHTML = `
+                    <div class="alert alert-danger text-center">
+                        <img src="https://img.icons8.com/color/96/cancel.png" alt="Denied" class="mb-3">
+                        <h4 class="alert-heading">Access Denied!</h4>
+                        <hr>
+                        <p class="mb-0">${data.message}</p>
+                        ${data.reason ? `<small class="text-muted">${data.reason}</small>` : ''}
+                    </div>
+                `;
+                
+                // Play voice message
+                speakMessage(data.voice_message);
+                
+                // Restart scanner after 3 seconds
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('scanStatus').style.display = 'none';
+            document.getElementById('accessResult').innerHTML = `
+                <div class="alert alert-danger text-center">
+                    <h4 class="alert-heading">Error!</h4>
+                    <p class="mb-0">Failed to process request. Please try again.</p>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        });
+    }
+
+    function speakMessage(message) {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(message);
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function onScanError(errorMessage) {
+        // Handle scan error silently
+        console.log('Scan error:', errorMessage);
+    }
+
+    // Initialize scanner when page loads
+    window.addEventListener('load', function() {
+        try {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "qr-reader", 
+                { 
+                    fps: 10, 
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0,
+                    showTorchButtonIfSupported: true
+                },
+                /* verbose= */ false
+            );
+            html5QrcodeScanner.render(onScanSuccess, onScanError);
+        } catch (error) {
+            console.error('Error initializing scanner:', error);
+            document.getElementById('accessResult').innerHTML = `
+                <div class="alert alert-warning text-center">
+                    <h5>Camera Access Required</h5>
+                    <p class="mb-0">Please allow camera access to scan QR codes</p>
+                    <small class="text-muted">You can also use manual entry below</small>
+                </div>
+            `;
+            document.getElementById('accessResult').style.display = 'block';
+        }
+    });
+
+    // Manual entry form handler
+    document.getElementById('manualEntryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const visitorId = document.getElementById('visitorId').value.trim();
+        if (visitorId) {
+            // Create QR-like data format
+            const qrData = JSON.stringify({
+                visitor_id: visitorId,
+                manual_entry: true
+            });
+            processAccess(qrData);
+        }
+    });
+</script>
+
+<style>
+    #qr-reader {
+        border: 3px dashed var(--primary-color);
+        border-radius: 15px;
+        overflow: hidden;
+        min-height: 300px;
+    }
+
+    #qr-reader video {
+        border-radius: 10px;
+    }
+
+    #qr-reader__dashboard {
+        padding: 10px;
+    }
+
+    #qr-reader__dashboard_section_swaplink {
+        display: none;
+    }
+</style>
+{% endblock %}

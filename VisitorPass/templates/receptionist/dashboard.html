@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="fw-bold">
+                <img src="https://img.icons8.com/color/48/dashboard.png" alt="Dashboard" class="me-2">
+                Receptionist Dashboard
+            </h2>
+            <p class="text-muted">Manage visitor registrations and track entries</p>
+        </div>
+        <div class="col-auto d-flex gap-1">
+            <a href="{{ url_for('register_visitor') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-person-plus me-2"></i> Register New Visitor
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-icon">
+                    <img src="https://img.icons8.com/color/64/users-settings.png" alt="Total">
+                </div>
+                <div class="stat-details">
+                    <div class="stat-value">{{ stats.total_today }}</div>
+                    <div class="stat-label">Today's Visitors</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-success">
+                <div class="stat-icon">
+                    <img src="https://img.icons8.com/color/64/checked-user-male.png" alt="Active">
+                </div>
+                <div class="stat-details">
+                    <div class="stat-value">{{ stats.active_now }}</div>
+                    <div class="stat-label">Currently Active</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-info">
+                <div class="stat-icon">
+                    <img src="https://img.icons8.com/color/64/conference-call.png" alt="Meetings">
+                </div>
+                <div class="stat-details">
+                    <div class="stat-value">{{ stats.meetings }}</div>
+                    <div class="stat-label">Meetings Today</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-warning">
+                <div class="stat-icon">
+                    <img src="https://img.icons8.com/color/64/vip.png" alt="VIP">
+                </div>
+                <div class="stat-details">
+                    <div class="stat-value">{{ stats.vip_visitors }}</div>
+                    <div class="stat-label">VIP Visitors</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Visitors Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-clock-history me-2 text-primary"></i>
+                Recent Visitors
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Visitor ID</th>
+                            <th>Name</th>
+                            <th>Purpose</th>
+                            <th>Contact</th>
+                            <th>Current Location</th>
+                            <th>Registered At</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for visitor in visitors %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-secondary">{{ visitor.visitor_id }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-2">
+                                        {{ visitor.full_name[0].upper() }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">{{ visitor.title }} {{ visitor.full_name }}</div>
+                                        <small class="text-muted">{{ visitor.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-purpose-{{ visitor.purpose|lower|replace(' ', '-') }}">
+                                    {{ visitor.purpose }}
+                                </span>
+                            </td>
+                            <td>{{ visitor.contact_number }}</td>
+                            <td>
+                                {% if visitor.current_location %}
+                                    <span class="badge bg-info">
+                                        <i class="bi bi-geo-alt-fill me-1"></i>
+                                        {{ visitor.current_location }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">Not checked in</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ visitor.created_at|datetime }}</td>
+                            <td>
+                                {% if visitor.end_datetime > now() %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Expired</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('visitor_pass', visitor_id=visitor.visitor_id) }}" 
+                                   class="btn btn-sm btn-outline-primary" title="View Pass">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <img src="https://img.icons8.com/color/96/nothing-found.png" alt="No visitors">
+                                <p class="text-muted mt-3">No visitors registered today</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-refresh every 30 seconds
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+</script>
+{% endblock %}
